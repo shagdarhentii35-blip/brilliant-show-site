@@ -12,6 +12,11 @@ export default defineConfig({
     // nitro/vite builds from this
     server: { entry: "server" },
   },
+  // Hard-pin Netlify. Outside this setting, production builds fall back to
+  // the Cloudflare module preset even when Netlify is the deploy target.
+  nitro: {
+    preset: "netlify",
+  },
   vite: {
     server: {
       host: "0.0.0.0",
