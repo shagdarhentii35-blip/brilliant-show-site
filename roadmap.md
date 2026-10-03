@@ -1,0 +1,3 @@
+- [x] Build a new responsive DIAMOND promotions page with original visuals.
+- [x] Include promotion details, participation steps, terms, and support.
+- [x] Verify desktop and mobile rendering and interactions.
