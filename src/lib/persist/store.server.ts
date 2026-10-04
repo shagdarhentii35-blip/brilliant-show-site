@@ -1,6 +1,4 @@
 import { randomBytes, scrypt, timingSafeEqual } from "node:crypto";
-import { mkdir, readFile, writeFile } from "node:fs/promises";
-import path from "node:path";
 import { promisify } from "node:util";
 import { deleteCookie, getCookie, setCookie } from "@tanstack/react-start/server";
 import { getCatalogItem, promotionClaimAmountMnt } from "@/lib/bonus/admin-config";
@@ -8,6 +6,7 @@ import type { PublicUser, StoredSession, StoredUser } from "@/lib/auth/types";
 import type { PromotionClaim } from "@/lib/claims/types";
 import type { BonusId } from "@/lib/bonus/types";
 import { notifyClaim } from "@/lib/notify/telegram";
+import { readAppStore, writeAppStore, type AppStore } from "@/lib/persist/blobs.server";
 
 const scryptAsync = promisify(scrypt);
 
@@ -15,48 +14,25 @@ const SESSION_COOKIE = "promo_session";
 const SESSION_MS = 7 * 24 * 60 * 60 * 1000;
 const USERNAME_PATTERN = /^[a-zA-Z0-9_]{3,24}$/;
 
-interface StoreFile {
-  users: StoredUser[];
-  sessions: StoredSession[];
-  claims: PromotionClaim[];
-}
-
-const emptyStore = (): StoreFile => ({ users: [], sessions: [], claims: [] });
-
-function dataPath() {
-  return path.join(process.cwd(), "data", "store.json");
-}
-
 let writeQueue: Promise<void> = Promise.resolve();
 
-async function readStore(): Promise<StoreFile> {
-  try {
-    const raw = await readFile(dataPath(), "utf8");
-    const parsed = JSON.parse(raw) as StoreFile;
-    return {
-      users: parsed.users ?? [],
-      sessions: parsed.sessions ?? [],
-      claims: parsed.claims ?? [],
-    };
-  } catch {
-    return emptyStore();
-  }
-}
-
-async function writeStore(store: StoreFile) {
-  const dir = path.dirname(dataPath());
-  await mkdir(dir, { recursive: true });
-  await writeFile(dataPath(), JSON.stringify(store, null, 2), "utf8");
-}
-
-async function withStore<T>(fn: (store: StoreFile) => Promise<T> | T): Promise<T> {
+async function withStore<T>(fn: (store: AppStore) => Promise<T> | T): Promise<T> {
   const run = writeQueue.then(async () => {
-    const store = await readStore();
-    const now = Date.now();
-    store.sessions = store.sessions.filter((session) => new Date(session.expiresAt).getTime() > now);
-    const result = await fn(store);
-    await writeStore(store);
-    return result;
+    let lastError: unknown;
+    for (let attempt = 0; attempt < 4; attempt++) {
+      const { data: store, etag } = await readAppStore();
+      const now = Date.now();
+      store.sessions = store.sessions.filter((session) => new Date(session.expiresAt).getTime() > now);
+      const result = await fn(store);
+      try {
+        const written = await writeAppStore(store, etag);
+        if (written) return result;
+        lastError = new Error("Failed to persist application store.");
+      } catch (error) {
+        lastError = error;
+      }
+    }
+    throw lastError instanceof Error ? lastError : new Error("Failed to persist application store.");
   });
   writeQueue = run.then(
     () => undefined,

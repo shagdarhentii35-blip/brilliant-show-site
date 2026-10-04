@@ -20,7 +20,7 @@ dist-ssr
 .wrangler/
 .dev.vars
 
-# Local auth/claim database (development)
+# Legacy local JSON seed (read-only; the app persists to Netlify Blobs)
 data/*.json
 
 # Editor directories and files
