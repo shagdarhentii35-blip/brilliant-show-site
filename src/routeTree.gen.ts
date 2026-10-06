@@ -13,6 +13,9 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as BonusesRouteImport } from './routes/bonuses'
 import { Route as BonusesIndexRouteImport } from './routes/bonuses/index'
 import { Route as BonusesBonusIdRouteImport } from './routes/bonuses/$bonusId'
+import { Route as ApiTelegramChatsRouteImport } from './routes/api.telegram.chats'
+import { Route as ApiTelegramTestRouteImport } from './routes/api.telegram.test'
+import { Route as ApiTelegramWebhookRouteImport } from './routes/api.telegram.webhook'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -34,17 +37,38 @@ const BonusesBonusIdRoute = BonusesBonusIdRouteImport.update({
   path: '/$bonusId',
   getParentRoute: () => BonusesRoute,
 } as any)
+const ApiTelegramChatsRoute = ApiTelegramChatsRouteImport.update({
+  id: '/api/telegram/chats',
+  path: '/api/telegram/chats',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiTelegramTestRoute = ApiTelegramTestRouteImport.update({
+  id: '/api/telegram/test',
+  path: '/api/telegram/test',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiTelegramWebhookRoute = ApiTelegramWebhookRouteImport.update({
+  id: '/api/telegram/webhook',
+  path: '/api/telegram/webhook',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/bonuses': typeof BonusesRouteWithChildren
   '/bonuses/$bonusId': typeof BonusesBonusIdRoute
   '/bonuses/': typeof BonusesIndexRoute
+  '/api/telegram/chats': typeof ApiTelegramChatsRoute
+  '/api/telegram/test': typeof ApiTelegramTestRoute
+  '/api/telegram/webhook': typeof ApiTelegramWebhookRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/bonuses/$bonusId': typeof BonusesBonusIdRoute
   '/bonuses': typeof BonusesIndexRoute
+  '/api/telegram/chats': typeof ApiTelegramChatsRoute
+  '/api/telegram/test': typeof ApiTelegramTestRoute
+  '/api/telegram/webhook': typeof ApiTelegramWebhookRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -52,18 +76,45 @@ export interface FileRoutesById {
   '/bonuses': typeof BonusesRouteWithChildren
   '/bonuses/$bonusId': typeof BonusesBonusIdRoute
   '/bonuses/': typeof BonusesIndexRoute
+  '/api/telegram/chats': typeof ApiTelegramChatsRoute
+  '/api/telegram/test': typeof ApiTelegramTestRoute
+  '/api/telegram/webhook': typeof ApiTelegramWebhookRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/bonuses' | '/bonuses/$bonusId' | '/bonuses/'
+  fullPaths:
+    | '/'
+    | '/bonuses'
+    | '/bonuses/$bonusId'
+    | '/bonuses/'
+    | '/api/telegram/chats'
+    | '/api/telegram/test'
+    | '/api/telegram/webhook'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/bonuses/$bonusId' | '/bonuses'
-  id: '__root__' | '/' | '/bonuses' | '/bonuses/$bonusId' | '/bonuses/'
+  to:
+    | '/'
+    | '/bonuses/$bonusId'
+    | '/bonuses'
+    | '/api/telegram/chats'
+    | '/api/telegram/test'
+    | '/api/telegram/webhook'
+  id:
+    | '__root__'
+    | '/'
+    | '/bonuses'
+    | '/bonuses/$bonusId'
+    | '/bonuses/'
+    | '/api/telegram/chats'
+    | '/api/telegram/test'
+    | '/api/telegram/webhook'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   BonusesRoute: typeof BonusesRouteWithChildren
+  ApiTelegramChatsRoute: typeof ApiTelegramChatsRoute
+  ApiTelegramTestRoute: typeof ApiTelegramTestRoute
+  ApiTelegramWebhookRoute: typeof ApiTelegramWebhookRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -96,6 +147,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BonusesBonusIdRouteImport
       parentRoute: typeof BonusesRoute
     }
+    '/api/telegram/chats': {
+      id: '/api/telegram/chats'
+      path: '/api/telegram/chats'
+      fullPath: '/api/telegram/chats'
+      preLoaderRoute: typeof ApiTelegramChatsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/telegram/test': {
+      id: '/api/telegram/test'
+      path: '/api/telegram/test'
+      fullPath: '/api/telegram/test'
+      preLoaderRoute: typeof ApiTelegramTestRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/telegram/webhook': {
+      id: '/api/telegram/webhook'
+      path: '/api/telegram/webhook'
+      fullPath: '/api/telegram/webhook'
+      preLoaderRoute: typeof ApiTelegramWebhookRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -115,6 +187,9 @@ const BonusesRouteWithChildren =
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   BonusesRoute: BonusesRouteWithChildren,
+  ApiTelegramChatsRoute: ApiTelegramChatsRoute,
+  ApiTelegramTestRoute: ApiTelegramTestRoute,
+  ApiTelegramWebhookRoute: ApiTelegramWebhookRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

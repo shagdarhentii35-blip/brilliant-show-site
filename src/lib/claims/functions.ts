@@ -22,3 +22,8 @@ export const listMyClaimsFn = createServerFn({ method: "GET" }).handler(async ()
   const { listSessionClaims } = await import("@/lib/persist/store.server");
   return listSessionClaims();
 });
+
+export const claimScratchRewardFn = createServerFn({ method: "POST" }).handler(async () => {
+  const { claimScratchReward } = await import("@/lib/persist/store.server");
+  return claimScratchReward();
+});

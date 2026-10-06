@@ -4,13 +4,13 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { PromoCard } from "@/components/bonus/PromoCard";
+import { ScratchFeatureBanner } from "@/components/bonus/ScratchFeatureBanner";
 import { QueryState } from "@/components/bonus/StatusBadge";
 import { SiteFooter, SiteHeader } from "@/components/site/SiteHeader";
 import { useBonusCatalog } from "@/hooks/use-bonus";
 import { bonusImages } from "@/lib/bonus/images";
 import type { Bonus } from "@/lib/bonus/types";
 import {
-  ArrowRight,
   BadgeHelp,
   ChevronRight,
   CircleAlert,
@@ -19,12 +19,12 @@ import {
   Gamepad2,
   Gift,
   Headset,
+  Sparkles,
   Star,
   UserRoundPlus,
   Wallet,
 } from "lucide-react";
 import heroImage from "@/assets/diamond-hero.jpg";
-import scratchBanner from "@/assets/scratch-banner.jpg";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -32,11 +32,13 @@ export const Route = createFileRoute("/")({
       { title: "Урамшуулал | DIAMOND Promotions" },
       {
         name: "description",
-        content:
-          "DIAMOND-ийн welcome bonus, өдөр бүрийн бэлэг, даалгавар, азын карт болон бусад урамшууллуудтай танилцаарай.",
+        content: "DIAMOND first deposit, deposit bonus, cashback, VIP, special events, and scratch cards.",
       },
       { property: "og:title", content: "DIAMOND Promotions — Урамшуулал" },
-      { property: "og:description", content: "DIAMOND-ийн бэлэг, өдөр тутмын урамшуулал, азын карттай танилцаарай." },
+      {
+        property: "og:description",
+        content: "First deposit 100%, deposit bonus, cashback, VIP, special events, and scratch & win.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -47,9 +49,6 @@ export const Route = createFileRoute("/")({
 function Index() {
   const catalog = useBonusCatalog();
   const [selected, setSelected] = useState<Bonus | null>(null);
-  const featured = catalog.data?.filter((item) => item.placement === "featured") ?? [];
-  const more = catalog.data?.filter((item) => item.placement === "more") ?? [];
-  const scratch = catalog.data?.find((item) => item.id === "scratch");
 
   const steps = [
     { icon: UserRoundPlus, title: "1. Бүртгүүлэх", copy: "DIAMOND-д бүртгүүлнэ" },
@@ -77,10 +76,10 @@ function Index() {
             </p>
             <div className="mt-4 grid grid-cols-4 gap-3 text-primary-foreground sm:gap-7">
               {[
-                { icon: UserRoundPlus, label: "ШИНЭ ТОГЛОГЧ" },
-                { icon: Gift, label: "ӨДӨР БҮР" },
-                { icon: Crown, label: "VIP УРАМШУУЛАЛ" },
-                { icon: Star, label: "ОНЦГОЙ ЭВЕНТ" },
+                { icon: Gift, label: "FIRST DEPOSIT" },
+                { icon: Sparkles, label: "CASHBACK" },
+                { icon: Crown, label: "VIP" },
+                { icon: Star, label: "SPECIAL EVENT" },
               ].map(({ icon: Icon, label }) => (
                 <div key={label} className="flex min-w-0 flex-col items-center gap-1">
                   <span className="grid size-8 place-items-center rounded-full border border-gold/70 bg-deep-sea/75 sm:size-10">
@@ -94,41 +93,15 @@ function Index() {
         </section>
 
         <div className="mx-auto max-w-[1320px] px-3 pb-10 pt-3 sm:px-6 sm:pt-4">
+          <ScratchFeatureBanner />
           <QueryState isLoading={catalog.isLoading} isError={catalog.isError} error={catalog.error}>
-          <section id="promotions" aria-label="Урамшууллууд" className="grid grid-cols-1 gap-3 min-[520px]:grid-cols-2 lg:grid-cols-4">
-            {featured.map((promo) => (
-              <PromoCard key={promo.id} promo={promo} onOpen={setSelected} />
-            ))}
-          </section>
-
-          <section aria-labelledby="scratch-title" className="relative isolate mt-3 flex min-h-[215px] overflow-hidden rounded-lg border border-primary-foreground/35 card-glow sm:min-h-[185px] lg:min-h-[205px]">
-            <img src={scratchBanner} alt="" loading="lazy" width={1920} height={640} className="absolute inset-0 h-full w-full object-cover" />
-            <div className="absolute inset-0 bg-deep-sea/20" />
-            <div className="relative mx-auto flex w-full max-w-[850px] flex-col items-center justify-center px-4 py-5 text-center text-primary-foreground lg:flex-row lg:justify-center lg:gap-12">
-              <div className="min-w-0">
-                <p className="mb-1 text-[10px] font-extrabold uppercase text-gold sm:text-xs">АЗАА СОРЬЖ, НУУЦ ШАГНАЛАА НЭЭ</p>
-                <h2 id="scratch-title" className="font-display text-4xl font-black leading-none display-shadow sm:text-5xl lg:text-6xl">
-                  SCRATCH <span className="text-gold">CARD</span>
-                </h2>
-                <p className="mt-2 text-xs font-bold sm:text-sm">Картаа зурж, өөртөө зориулсан бэлгийг нээгээрэй!</p>
-              </div>
-              <Button
-                variant="gold"
-                className="mt-4 h-11 shrink-0 rounded-lg px-7 text-sm lg:mt-0"
-                onClick={() => {
-                  if (scratch) setSelected(scratch);
-                }}
-              >
-                АЗАА СОРИХ <ArrowRight aria-hidden="true" />
-              </Button>
-            </div>
-          </section>
-
-          <section aria-label="Бусад урамшуулал" className="mt-3 grid grid-cols-1 gap-3 min-[520px]:grid-cols-3">
-            {more.map((promo) => (
-              <PromoCard key={promo.id} promo={promo} compact onOpen={setSelected} />
-            ))}
-          </section>
+            <section id="promotions" aria-label="Урамшууллууд" className="mt-3 grid grid-cols-1 gap-3 min-[520px]:grid-cols-2 lg:grid-cols-3">
+              {catalog.data
+                ?.filter((promo) => promo.kind !== "interactive")
+                .map((promo) => (
+                  <PromoCard key={promo.id} promo={promo} onOpen={setSelected} />
+                ))}
+            </section>
           </QueryState>
 
           <section id="how-it-works" aria-labelledby="steps-title" className="section-glass mt-4 rounded-lg p-3 sm:p-4">
@@ -168,7 +141,7 @@ function Index() {
                 <AccordionItem value="reward">
                   <AccordionTrigger className="py-2 text-xs sm:text-sm">Шагнал ба урамшуулал</AccordionTrigger>
                   <AccordionContent className="text-xs leading-relaxed text-muted-foreground">
-                    Шагнал, бонусын хэмжээ болон ашиглах нөхцөл нь тухайн идэвхтэй саналын дүрмээс хамаарна. Урамшуулал бүрийн дэлгэрэнгүй мэдээллийг шалгана уу.
+                    Энэ сайт нь мэдээллийн зориулалттай. Бонус автоматаар олгогдохгүй. Тухайн урамшууллын дүрмийг шалгана уу.
                   </AccordionContent>
                 </AccordionItem>
                 <AccordionItem value="play">
@@ -219,16 +192,28 @@ function Index() {
               <div className="p-5">
                 <DialogHeader>
                   <DialogTitle className="text-left font-display text-xl">{selected.title}</DialogTitle>
+                  <p className="pt-1 text-left font-display text-lg font-black text-primary">{selected.highlight}</p>
                   <DialogDescription className="pt-2 text-left leading-relaxed">{selected.detail}</DialogDescription>
                 </DialogHeader>
+                <ul className="mt-3 space-y-1 text-sm font-medium">
+                  {selected.points.map((point) => (
+                    <li key={point}>{point}</li>
+                  ))}
+                </ul>
                 <p className="mt-3 flex items-start gap-2 text-xs text-muted-foreground">
                   <BadgeHelp className="size-4 shrink-0 text-primary" aria-hidden="true" /> Тухайн урамшууллын хүчинтэй нөхцөлийг заавал шалгаарай.
                 </p>
-                <Button variant="casino" className="mt-5 w-full rounded-full" asChild>
-                  <Link to="/bonuses/$bonusId" params={{ bonusId: selected.id }} onClick={() => setSelected(null)}>
-                    {selected.action} <ChevronRight aria-hidden="true" />
-                  </Link>
-                </Button>
+                {selected.kind === "comingSoon" ? (
+                  <Button variant="gold" className="mt-5 w-full rounded-full" disabled>
+                    {selected.action}
+                  </Button>
+                ) : (
+                  <Button variant={selected.kind === "interactive" ? "gold" : "casino"} className="mt-5 w-full rounded-full" asChild>
+                    <Link to="/bonuses/$bonusId" params={{ bonusId: selected.id }} onClick={() => setSelected(null)}>
+                      {selected.action} <ChevronRight aria-hidden="true" />
+                    </Link>
+                  </Button>
+                )}
               </div>
             </>
           ) : null}

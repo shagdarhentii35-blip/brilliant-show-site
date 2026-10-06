@@ -42,6 +42,11 @@ export interface Bonus {
   badge: PromoBadge;
   imageKey: BonusId;
   placement: "featured" | "more";
+  highlight: string;
+  points: string[];
+  kind: "info" | "comingSoon" | "interactive";
+  emphasized?: boolean;
+  visible?: boolean;
 }
 
 export interface BonusClaim {

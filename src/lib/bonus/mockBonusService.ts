@@ -1,7 +1,7 @@
 import {
-  catalogConfig,
   dailyBonusSchedule,
   getCatalogItem,
+  listedCatalog,
   missionTemplates,
   mysteryPools,
   raceConfig,
@@ -198,7 +198,7 @@ function buildLeaderboard(): LeaderboardEntry[] {
 
 export const mockBonusService: BonusService = {
   async getCatalog(): Promise<Bonus[]> {
-    return catalogConfig;
+    return listedCatalog();
   },
 
   async getUser(): Promise<User> {

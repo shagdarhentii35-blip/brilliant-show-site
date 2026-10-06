@@ -2,6 +2,14 @@ export function formatMnt(amount: number): string {
   return `${amount.toLocaleString("en-US")}₮`;
 }
 
+export function formatCountdown(ms: number): string {
+  const total = Math.max(0, Math.ceil(ms / 1000));
+  const hours = Math.floor(total / 3600);
+  const minutes = Math.floor((total % 3600) / 60);
+  const seconds = total % 60;
+  return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+}
+
 export function formatRewardLabel(amountMnt: number, kind?: "cash" | "jackpot"): string {
   const base = formatMnt(amountMnt);
   return kind === "jackpot" ? `${base} JACKPOT` : base;

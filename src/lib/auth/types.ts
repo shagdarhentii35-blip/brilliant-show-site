@@ -6,6 +6,10 @@ export interface PublicUser {
 
 export interface StoredUser extends PublicUser {
   passwordHash: string;
+  lastScratchAt?: string;
+  lastScratchAmountMnt?: number;
+  lastScratchKind?: "jackpot";
+  lastScratchClaimId?: string;
 }
 
 export interface StoredSession {

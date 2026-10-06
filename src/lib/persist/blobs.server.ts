@@ -1,5 +1,5 @@
 import { getStore, type Store } from "@netlify/blobs";
-import { readFile } from "node:fs/promises";
+import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import type { StoredSession, StoredUser } from "@/lib/auth/types";
 import type { PromotionClaim } from "@/lib/claims/types";
@@ -14,9 +14,16 @@ export const emptyStore = (): AppStore => ({ users: [], sessions: [], claims: []
 
 const BLOB_STORE = "promo-app";
 const BLOB_KEY = "state";
+const RUNTIME_STORE_PATH = path.join(process.cwd(), "data", "runtime-store.json");
 
-let blobClient: Store | null | undefined;
-let memoryStore: AppStore | null = null;
+type PersistGlobal = typeof globalThis & {
+  __promoMemoryStore?: AppStore | null;
+  __promoBlobClient?: Store | null;
+};
+
+function persistGlobal(): PersistGlobal {
+  return globalThis as PersistGlobal;
+}
 
 function env(name: string) {
   return process.env[name];
@@ -51,15 +58,16 @@ function openBlobStore(): Store {
 }
 
 function resolveBlobStore(): Store | null {
-  if (blobClient !== undefined) return blobClient;
+  const g = persistGlobal();
+  if ("__promoBlobClient" in g && g.__promoBlobClient !== undefined) return g.__promoBlobClient;
   try {
-    blobClient = openBlobStore();
-    return blobClient;
+    g.__promoBlobClient = openBlobStore();
+    return g.__promoBlobClient;
   } catch (error) {
     if (isNetlifyRuntime() || !isMissingBlobsConfig(error)) {
       throw error;
     }
-    blobClient = null;
+    g.__promoBlobClient = null;
     return null;
   }
 }
@@ -82,17 +90,37 @@ async function loadLegacySeed(): Promise<AppStore | null> {
   }
 }
 
-async function ensureMemoryStore(): Promise<AppStore> {
-  if (!memoryStore) {
-    memoryStore = (await loadLegacySeed()) ?? emptyStore();
+async function loadRuntimeStore(): Promise<AppStore | null> {
+  try {
+    const raw = await readFile(RUNTIME_STORE_PATH, "utf8");
+    return normalize(JSON.parse(raw) as Partial<AppStore>);
+  } catch {
+    return null;
   }
-  return memoryStore;
+}
+
+async function saveRuntimeStore(data: AppStore): Promise<void> {
+  await mkdir(path.dirname(RUNTIME_STORE_PATH), { recursive: true });
+  await writeFile(RUNTIME_STORE_PATH, JSON.stringify(data), "utf8");
+}
+
+async function ensureMemoryStore(): Promise<AppStore> {
+  const g = persistGlobal();
+  if (!g.__promoMemoryStore) {
+    g.__promoMemoryStore = (await loadRuntimeStore()) ?? (await loadLegacySeed()) ?? emptyStore();
+  }
+  return g.__promoMemoryStore;
 }
 
 export async function readAppStore(): Promise<{ data: AppStore; etag?: string }> {
   try {
     const blobs = resolveBlobStore();
     if (!blobs) {
+      const fromDisk = await loadRuntimeStore();
+      if (fromDisk) {
+        persistGlobal().__promoMemoryStore = fromDisk;
+        return { data: structuredClone(fromDisk) };
+      }
       return { data: structuredClone(await ensureMemoryStore()) };
     }
 
@@ -102,13 +130,18 @@ export async function readAppStore(): Promise<{ data: AppStore; etag?: string }>
       return result.etag ? { data, etag: result.etag } : { data };
     }
 
-    const seed = await loadLegacySeed();
+    const seed = (await loadRuntimeStore()) ?? (await loadLegacySeed());
     return { data: seed ?? emptyStore() };
   } catch (error) {
     if (isNetlifyRuntime() || !isMissingBlobsConfig(error)) {
       throw error;
     }
-    blobClient = null;
+    persistGlobal().__promoBlobClient = null;
+    const fromDisk = await loadRuntimeStore();
+    if (fromDisk) {
+      persistGlobal().__promoMemoryStore = fromDisk;
+      return { data: structuredClone(fromDisk) };
+    }
     return { data: structuredClone(await ensureMemoryStore()) };
   }
 }
@@ -117,7 +150,8 @@ export async function writeAppStore(data: AppStore, etag?: string): Promise<bool
   try {
     const blobs = resolveBlobStore();
     if (!blobs) {
-      memoryStore = structuredClone(data);
+      persistGlobal().__promoMemoryStore = structuredClone(data);
+      await saveRuntimeStore(data);
       return true;
     }
 
@@ -129,8 +163,9 @@ export async function writeAppStore(data: AppStore, etag?: string): Promise<bool
     if (isNetlifyRuntime() || !isMissingBlobsConfig(error)) {
       throw error;
     }
-    blobClient = null;
-    memoryStore = structuredClone(data);
+    persistGlobal().__promoBlobClient = null;
+    persistGlobal().__promoMemoryStore = structuredClone(data);
+    await saveRuntimeStore(data);
     return true;
   }
 }

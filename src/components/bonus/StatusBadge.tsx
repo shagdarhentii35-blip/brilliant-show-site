@@ -14,6 +14,9 @@ const labels: Record<string, string> = {
   loading: "Loading",
   error: "Error",
   pending: "Pending",
+  APPROVED: "Approved",
+  REJECTED: "Rejected",
+  PENDING: "Pending",
 };
 
 export function StatusBadge({ status }: { status: string }) {

@@ -86,6 +86,13 @@
 @utility section-glass { background: oklch(0.92 0.056 197 / .66); }
 @utility hero-mask { background: linear-gradient(90deg, oklch(0.18 0.07 224 / .08), oklch(0.17 0.07 223 / .28) 37%, oklch(0.16 0.067 220 / .32) 65%, oklch(0.18 0.07 224 / .04)); }
 @utility pale-surface { background: oklch(1 0 0 / .88); }
+@utility scratch-feature-glow {
+  box-shadow:
+    0 0 0 2px oklch(0.86 0.156 86 / .55),
+    0 0 36px oklch(0.84 0.151 86 / .45),
+    0 0 80px oklch(0.47 0.126 209 / .35),
+    var(--shadow-card);
+}
 
 .badge-pink { background: var(--rose); }
 .badge-blue { background: var(--primary); }
@@ -100,9 +107,56 @@
   75% { transform: rotate(-6deg) scale(1.03); }
 }
 
-.mystery-box-shake { animation: mystery-box-shake 0.7s ease-in-out; }
+.scratch-live-scroll {
+  animation: scratch-live-scroll 22s linear infinite;
+}
+
+@keyframes scratch-live-scroll {
+  0% { transform: translateY(0); }
+  100% { transform: translateY(-50%); }
+}
+
+@keyframes scratch-win-pop {
+  0% { transform: scale(0.72); opacity: 0; }
+  55% { transform: scale(1.08); opacity: 1; }
+  100% { transform: scale(1); }
+}
+
+@keyframes scratch-win-glow {
+  0%, 100% { opacity: 0.55; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.12); }
+}
+
+@keyframes scratch-win-spark {
+  0%, 100% { opacity: 0.2; transform: translateY(0) scale(0.8); }
+  50% { opacity: 1; transform: translateY(-8px) scale(1.15); }
+}
+
+.scratch-win-burst {
+  background:
+    radial-gradient(circle at 50% 45%, oklch(0.86 0.156 86 / .42), transparent 58%),
+    radial-gradient(circle at 20% 80%, oklch(0.84 0.151 86 / .18), transparent 40%),
+    radial-gradient(circle at 80% 20%, oklch(0.84 0.151 86 / .2), transparent 38%);
+  animation: scratch-win-glow 2.2s ease-in-out infinite;
+}
+
+.scratch-win-amount {
+  animation: scratch-win-pop 0.75s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.scratch-win-spark {
+  position: absolute;
+  border-radius: 999px;
+  background: oklch(0.92 0.12 95);
+  box-shadow: 0 0 10px oklch(0.86 0.156 86 / .9);
+  animation: scratch-win-spark 1.6s ease-in-out infinite;
+}
 
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
-  .mystery-box-shake { animation: none; }
+  .mystery-box-shake,
+  .scratch-live-scroll,
+  .scratch-win-burst,
+  .scratch-win-amount,
+  .scratch-win-spark { animation: none; }
 }

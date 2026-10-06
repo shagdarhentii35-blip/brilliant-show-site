@@ -8,28 +8,12 @@ export function SiteHeader() {
 
   return (
     <header className="relative z-10 section-glass">
-      <div className="mx-auto grid max-w-[1320px] grid-cols-[minmax(0,1fr)_auto] items-center gap-3 px-4 py-3 sm:px-7 lg:grid-cols-[auto_minmax(0,1fr)_auto] lg:py-2">
+      <div className="mx-auto grid max-w-[1320px] grid-cols-[minmax(0,1fr)_auto] items-center gap-3 px-4 py-3 sm:px-7 lg:py-2">
         <Link to="/" aria-label="DIAMOND нүүр" className="flex min-w-0 items-center gap-2 text-foreground">
           <Diamond className="size-7 shrink-0 fill-ice text-primary sm:size-8" strokeWidth={1.8} />
           <span className="truncate font-display text-2xl font-black leading-none sm:text-[29px]">DIAMOND</span>
         </Link>
-        <nav className="hidden h-8 items-center justify-center gap-5 rounded-full bg-primary/12 px-5 text-xs font-bold text-primary lg:flex">
-          <Link to="/" className="hover:underline">
-            Home
-          </Link>
-          <Link to="/bonuses" className="hover:underline">
-            Bonuses
-          </Link>
-        </nav>
         <div className="flex shrink-0 items-center gap-2">
-          <Button
-            variant="casino"
-            size="sm"
-            className="rounded-full px-3.5 text-xs sm:px-5 sm:text-sm lg:hidden"
-            asChild
-          >
-            <Link to="/bonuses">Bonuses</Link>
-          </Button>
           {isLoading ? null : user ? (
             <>
               <span className="max-w-[100px] truncate text-xs font-extrabold text-primary sm:max-w-[140px]">

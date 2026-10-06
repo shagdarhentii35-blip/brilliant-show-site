@@ -25,6 +25,7 @@ export function useRegister() {
       if (result.ok) {
         client.setQueryData(sessionKey, result.user);
         void client.invalidateQueries({ queryKey: claimsKey });
+        void client.invalidateQueries({ queryKey: ["scratch"] });
       }
     },
   });
@@ -39,6 +40,7 @@ export function useLogin() {
       if (result.ok) {
         client.setQueryData(sessionKey, result.user);
         void client.invalidateQueries({ queryKey: claimsKey });
+        void client.invalidateQueries({ queryKey: ["scratch"] });
       }
     },
   });
@@ -52,6 +54,7 @@ export function useLogout() {
     onSuccess: () => {
       client.setQueryData(sessionKey, null);
       client.setQueryData(claimsKey, []);
+      void client.invalidateQueries({ queryKey: ["scratch"] });
     },
   });
 }

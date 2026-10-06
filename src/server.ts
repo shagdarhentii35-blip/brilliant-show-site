@@ -1,7 +1,14 @@
 import "./lib/error-capture";
 
 import { consumeLastCapturedError } from "./lib/error-capture";
+import { applyServerEnvBindings, ensureTelegramProcessEnv } from "./lib/env/load-telegram-env.server";
 import { renderErrorPage } from "./lib/error-page";
+
+ensureTelegramProcessEnv();
+
+void import("./lib/notify/telegram-poll.server").then((mod) => {
+  mod.startTelegramCallbackPoller();
+});
 
 type ServerEntry = {
   fetch: (request: Request, env: unknown, ctx: unknown) => Promise<Response> | Response;
@@ -47,6 +54,8 @@ function isH3SwallowedErrorBody(body: string): boolean {
 export default {
   async fetch(request: Request, env: unknown, ctx: unknown) {
     try {
+      applyServerEnvBindings(env);
+      ensureTelegramProcessEnv();
       const handler = await getServerEntry();
       const response = await handler.fetch(request, env, ctx);
       return await normalizeCatastrophicSsrResponse(response);

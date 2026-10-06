@@ -1,6 +1,6 @@
 import type { BonusId } from "@/lib/bonus/types";
 
-export type ClaimStatus = "PENDING" | "COMPLETED";
+export type ClaimStatus = "PENDING" | "APPROVED" | "REJECTED" | "COMPLETED";
 
 export interface PromotionClaim {
   id: string;
@@ -11,4 +11,6 @@ export interface PromotionClaim {
   amountMnt: number;
   status: ClaimStatus;
   createdAt: string;
+  sourceScratchAt?: string;
+  reviewedAt?: string;
 }
